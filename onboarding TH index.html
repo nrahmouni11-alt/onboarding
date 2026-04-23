@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding Client - interactif v3</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f9;
+        padding: 20px;
+        color: #333;
+    }
+
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+    }
+
+    .section {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        color: #3498db;
+        border-bottom: 2px solid #eef2f5;
+        padding-bottom: 10px;
+    }
+
+    h3 {
+        margin-top: 20px;
+        color: #555;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box; /* Important pour le padding */
+    }
+
+    textarea {
+        resize: vertical;
+        height: 60px;
+    }
+
+    /* Style pour masquer/afficher la condition user-friendly */
+    #friendly_container {
+        display: none; /* Masqué par défaut */
+        border-left: 3px solid #3498db;
+        padding-left: 15px;
+        margin-left: 5px;
+        background-color: #f9fbfd;
+        padding-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .button-bar {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    button {
+        padding: 12px 20px;
+        margin: 5px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+    button:hover {
+        background: #2980b9;
+    }
+
+    button.secondary {
+        background: #95a5a6;
+    }
+    button.secondary:hover {
+        background: #7f8c8d;
+    }
+
+    #summary-container {
+        display: none; /* Masqué par défaut */
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        border-left: 5px solid #3498db;
+    }
+
+    #summary {
+        white-space: pre-wrap; /* Respecte les sauts de ligne */
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #eee;
+        margin-top: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>📞 Onboarding Client</h1>
+
+<form id="onboardingForm">
+    <div class="section">
+        <h2>🔎 Périmètre des réponses</h2>
+
+        <label for="infos">Les informations docusign / Annexes et Excel sont elles correctes ?</label>
+        <select id="infos"><option>Oui</option><option>Non</option></select>
+
+        <label for="ajust">Ajustements</label>
+        <textarea id="ajust" placeholder="Détails si non..."></textarea>
+
+        <label for="notif">Notifications</label>
+        <select id="notif"><option>Toutes</option><option>Notes uniquement</option></select>
+
+        <label for="urgence">Urgence ?</label>
+        <select id="urgence"><option>Non</option><option>Oui</option></select>
+
+        <label for="urgenceDetails">Détails urgences</label>
+        <textarea id="urgenceDetails" placeholder="Définition de l'urgence..."></textarea>
+
+        <label for="lien">Lien externe ?</label>
+        <select id="lien" onchange="toggleFriendlyQuestion()">
+            <option value="Non">Non</option>
+            <option value="Oui">Oui</option>
+        </select>
+
+        <div id="friendly_container">
+            <label for="friendly">User friendly ?</label>
+            <select id="friendly">
+                <option value="Oui">Oui</option>
+                <option value="Non">Non</option>
+                <option value="N/A">N/A (Masqué)</option>
+            </select>
+        </div>
+
+        <label for="faq">FAQ ?</label>
+        <select id="faq"><option>Non</option><option>Oui</option></select>
+
+        <label for="besoins">Besoins complémentaires</label>
+        <textarea id="besoins"></textarea>
+    </div>
+
+    <div class="section">
+        <h2>📲 Application & espace client</h2>
+
+        <label for="app">Avantages expliqués ?</label>
+        <select id="app"><option>Oui</option><option>Non</option></select>
+
+        <label for="connexion">Connexion OK ?</label>
+        <select id="connexion"><option>Oui</option><option>Non</option></select>
+
+        <label for="probleme">Problème connexion</label>
+        <textarea id="probleme" placeholder="Détails du souci..."></textarea>
+
+        <label for="infosJour">Infos journalières expliquées ?</label>
+        <select id="infosJour"><option>Oui</option><option>Non</option></select>
+
+        <label for="contacts">Contacts VIP expliqués ?</label>
+        <select id="contacts"><option>Oui</option><option>Non</option></select>
+
+        <label for="agenda">Besoin synchro agenda ?</label>
+        <select id="agenda"><option>Non</option><option>Oui</option></select>
+
+        <label for="emailSync">Email synchro envoyé ?</label>
+        <select id="emailSync"><option>Non applicable</option><option>Oui</option><option>Non</option></select>
+
+        <label for="feedback">Feedback expliqué ?</label>
+        <select id="feedback"><option>Oui</option><option>Non</option></select>
+    </div>
+
+    <div class="section">
+        <h2>📞 Téléphonie & Transfert</h2>
+
+        <label for="typeTransfert">Type de transfert</label>
+        <select id="typeTransfert">
+            <option>Conditionnel (si occupé/non-réponse)</option>
+            <option>Inconditionnel (toujours)</option>
+            <option>Pas de transfert</option>
+        </select>
+
+        <label for="operateur">Opérateur téléphonique du client</label>
+        <input type="text" id="operateur" placeholder="Ex: Orange, SFR, Free...">
+
+        <label for="testTransfert">Transfert testé en direct ?</label>
+        <select id="testTransfert">
+            <option>Oui, OK</option>
+            <option>Oui, ÉCHEC</option>
+            <option>Non</option>
+        </select>
+
+        <label for="whyNoTest">Si non ou échec, pourquoi ?</label>
+        <textarea id="whyNoTest"></textarea>
+    </div>
+
+    <div class="section">
+        <h2>📄 Informations générales</h2>
+
+        <label for="contact">Contact principal (Nom + Fonction)</label>
+        <input type="text" id="contact">
+
+        <label for="acces">Autres personnes autorisées ?</label>
+        <select id="acces"><option>Non</option><option>Oui</option></select>
+
+        <label for="noms">Noms des personnes autorisées</label>
+        <textarea id="noms"></textarea>
+
+        <label for="mdp">Mot de passe téléphonique modifié ?</label>
+        <select id="mdp"><option>Non applicable</option><option>Oui</option><option>Non</option></select>
+
+        <label for="mdpExplain">Explication donnée au client ?</label>
+        <select id="mdpExplain"><option>Oui</option><option>Non</option></select>
+
+        <label for="date">Date contrat / début facturation</label>
+        <input type="date" id="date">
+
+        <label for="facturation">Email facturation</label>
+        <input type="email" id="facturation" placeholder="exemple@domaine.com">
+
+        <label for="contrat">Rappel engagement contrat fait ?</label>
+        <select id="contrat"><option>Oui</option><option>Non</option></select>
+
+        <label for="horaires">Rappel horaires support (9h-18h) fait ?</label>
+        <select id="horaires"><option>Oui</option><option>Non</option></select>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Upselling</h2>
+
+        <h3>Call back in call note</h3>
+        <select id="cb_interest"><option>Non</option><option>Oui</option></select>
+        <textarea id="cb_reason" placeholder="Si non pourquoi / Commentaire"></textarea>
+
+        <h3>Friendly Follow Up</h3>
+        <select id="ffu_interest"><option>Non</option><option>Oui</option></select>
+        <textarea id="ffu_reason" placeholder="Si non pourquoi / Commentaire"></textarea>
+
+        <h3>Option 24/24</h3>
+        <select id="h24_interest"><option>Non</option><option>Oui</option></select>
+        <textarea id="h24_reason" placeholder="Si non pourquoi / Commentaire"></textarea>
+    </div>
+</form>
+
+<div class="button-bar">
+    <button onclick="generateSummary()">📄 Générer résumé</button>
+    <button onclick="copySummary()" class="secondary">📋 Copier</button>
+    <button onclick="exportPDF()" class="secondary">📑 Export PDF</button>
+</div>
+
+<div id="summary-container">
+    <h2>Résumé de l'Onboarding</h2>
+    <div id="summary"></div>
+</div>
+
+<script>
+// Raccourci pour obtenir la valeur d'un élément par son ID
+const getVal = (id) => document.getElementById(id).value;
+
+// Fonction pour gérer l'affichage conditionnel de la question User Friendly
+function toggleFriendlyQuestion() {
+    const lienExterne = getVal('lien');
+    const container = document.getElementById('friendly_container');
+    const selectFriendly = document.getElementById('friendly');
+
+    if (lienExterne === 'Oui') {
+        container.style.display = 'block'; // Afficher
+        // Réinitialiser la valeur si elle était sur N/A
+        if(selectFriendly.value === 'N/A') selectFriendly.value = 'Oui';
+    } else {
+        container.style.display = 'none';  // Masquer
+        selectFriendly.value = 'N/A';      // Définir une valeur par défaut masquée
+    }
+}
+
+function generateSummary(){
+    const today = new Date().toLocaleDateString('fr-FR');
+
+    // Gestion de l'affichage de User Friendly dans le résumé
+    const lienExtVal = getVal('lien');
+    const friendlyVal = lienExtVal === 'Oui' ? getVal('friendly') : 'N/A (Pas de lien externe)';
+
+    let summary = `=== COMPTE-RENDU D'ONBOARDING CLIENT ===
+Généré le : ${today}
+
+🔎 PÉRIMÈTRE DES RÉPONSES
+- Infos Docusign/Excel correctes : ${getVal('infos')}
+- Ajustements : ${getVal('ajust') || 'Aucun'}
+- Notifications : ${getVal('notif')}
+- Urgence gérée : ${getVal('urgence')}
+- Détails urgence : ${getVal('urgenceDetails') || 'N/A'}
+- Lien externe : ${lienExtVal}
+- User friendly : ${friendlyVal}
+- FAQ : ${getVal('faq')}
+- Besoins comp. : ${getVal('besoins') || 'Aucun'}
+
+📲 APPLICATION & ESPACE CLIENT
+- Avantages expliqués : ${getVal('app')}
+- Connexion OK : ${getVal('connexion')}
+- Problème connexion : ${getVal('probleme') || 'Aucun'}
+- Infos journalières : ${getVal('infosJour')}
+- Contacts VIP : ${getVal('contacts')}
+- Besoin synchro agenda : ${getVal('agenda')}
+- Email sync envoyé : ${getVal('emailSync')}
+- Feedback expliqué : ${getVal('feedback')}
+
+📞 TÉLÉPHONIE & TRANSFERT
+- Type de transfert : ${getVal('typeTransfert')}
+- Opérateur client : ${getVal('operateur') || 'Non spécifié'}
+- Test direct : ${getVal('testTransfert')}
+- Commentaire test : ${getVal('whyNoTest') || 'N/A'}
+
+📄 INFORMATIONS GÉNÉRALES
+- Contact principal : ${getVal('contact') || 'Non renseigné'}
+- Autres accès : ${getVal('acces')}
+- Noms accès : ${getVal('noms') || 'N/A'}
+- MDP modifié : ${getVal('mdp')}
+- Explication MDP : ${getVal('mdpExplain')}
+- Date contrat/fact : ${getVal('date') || 'Non renseignée'}
+- Email facturation : ${getVal('facturation') || 'Non renseigné'}
+- Rappel contrat : ${getVal('contrat')}
+- Rappel horaires : ${getVal('horaires')}
+
+🚀 UPSELLING (Intérêt client)
+- Call back in note : ${getVal('cb_interest')} (Obs: ${getVal('cb_reason') || 'N/A'})
+- Friendly Follow Up : ${getVal('ffu_interest')} (Obs: ${getVal('ffu_reason') || 'N/A'})
+- Option 24/24 : ${getVal('h24_interest')} (Obs: ${getVal('h24_reason') || 'N/A'})
+`;
+
+    document.getElementById("summary").innerText = summary;
+    document.getElementById("summary-container").style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function copySummary(){
+    const text = document.getElementById("summary").innerText;
+    if(!text) {
+        alert("Générez d'abord le résumé !");
+        return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Résumé copié dans le presse-papiers !");
+    }).catch(err => {
+        alert("Erreur lors de la copie... Essayez manuellement.");
+    });
+}
+
+function exportPDF(){
+    const text = document.getElementById("summary").innerText;
+    if(!text) {
+        alert("Générez d'abord le résumé !");
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF('p', 'mm', 'a4');
+    
+    doc.setFont("courier", "normal");
+    doc.setFontSize(10);
+
+    let margins = { top: 15, bottom: 15, left: 15, width: 180 };
+    let lines = doc.splitTextToSize(text, margins.width);
+    
+    doc.text(lines, margins.left, margins.top);
+    
+    doc.save("onboarding-client.pdf");
+}
+</script>
+
+</body>
+</html>
